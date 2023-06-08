@@ -3,6 +3,8 @@ pragma solidity ^0.8.18;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
+// Convert ETH amt from wei -> usd
+// Internal for no deploy
 library PriceConverter {
     function getPrice() internal view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
@@ -11,14 +13,14 @@ library PriceConverter {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
 
         // ETH/USD rate in 18 digits
-        return uint256(answer * 10000000000);
+        return uint256(answer * 1e18);
     }
 
     function getConversionRate(
         uint256 ethAmount
     ) internal view returns (uint256) {
         uint256 ethPrice = getPrice();
-        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1000000000000000000;
+        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1e18;
 
         return ethAmountInUsd;
     }
