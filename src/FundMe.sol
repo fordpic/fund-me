@@ -15,7 +15,6 @@ contract FundMe {
     address private immutable i_owner;
     AggregatorV3Interface private s_priceFeed;
     mapping(address => uint256) private s_addressToAmountFunded;
-    address[] private s_funders;
 
     // Modifiers
     modifier onlyOwner() {
@@ -64,6 +63,22 @@ contract FundMe {
             value: address(this).balance
         }("");
         require(callSuccess, "Call failed");
+    }
+
+    function cheaperWithdraw() public onlyOwner {
+        uint256 fundersLength = s_funders.length; // read from storage once instead
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < fundersLength;
+            funderIndex++
+        ) {
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+
+        s_funders = new address[](0);
+        (bool success, ) = i_owner.call{value: address(this).balance}("");
+        require(success, "Cheaper call failed");
     }
 
     // View Functions
